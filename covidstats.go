@@ -9,19 +9,14 @@ import (
 	"os"
 )
 
-func main() {
+type Resp struct {
+	Country   string
+	Cases     int
+	Deaths    int
+	Recovered int
+}
 
-	var country string
-
-	flag.StringVar(&country, "country", "", "specify country for COVID case stats")
-	flag.Parse()
-
-	type Resp struct {
-		Country   string
-		Cases     int
-		Deaths    int
-		Recovered int
-	}
+func getData() []Resp {
 
 	url := "https://corona.lmao.ninja/countries?sort=country"
 	method := "GET"
@@ -38,9 +33,19 @@ func main() {
 
 	var resp []Resp
 	json.Unmarshal([]byte(body), &resp)
+	return resp
 
+}
+
+func main() {
+
+	resp := getData()
+
+	var country string
+
+	flag.StringVar(&country, "country", "", "specify country for COVID case stats")
+	flag.Parse()
 	if country != "" {
-		//fmt.Println
 		for _, v := range resp {
 			if v.Country == country {
 				fmt.Println("Country:", v.Country)
@@ -62,10 +67,6 @@ func main() {
 	flag.Usage = func() {
 		fmt.Printf("Usage of %s:\n", os.Args[0])
 		fmt.Printf("covidstats -country=USA\n")
-		fmt.Printf("list of available countries:\n")
-		for i := 0; i < len(resp); i++ {
-			fmt.Printf("Country:", resp[i].Country, "\n")
-		}
-		flag.PrintDefaults()
 	}
+	flag.PrintDefaults()
 }
